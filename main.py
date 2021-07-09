@@ -56,7 +56,7 @@ class Bot:
         context.user_data['color'] = 'Любые'
         context.user_data['xlabel'] = ''
         context.user_data['ylabel'] = ''
-        context.user_data['type'] = 'Гистограмма'
+        context.user_data['type'] = 'Столбчатая'
         context.user_data['legend'] = False
         context.user_data['info'] = ''
         return 1
@@ -96,17 +96,30 @@ class Bot:
         if update.message.text == 'Вернуться назад':
             return 1
         else:
-            plot = Plot()
+            plot = Plot(context.user_data['title'], context.user_data['xlabel'],
+                        context.user_data['ylabel'], context.user_data['color'],
+                        context.user_data['type'], context.user_data['legend'], update.message.text)
+            if plot.create_figure(FIGURE_ADDRESS) is None:
+                self.send_img(FIGURE_ADDRESS, context, update, 'Вот ваша диаграмма!')
+                return 2
+            else:
+                update.message.reply_text('Используйте кнопки!',
+                                          reply_markup=self.create_keyboard(BACK_MARKUP))
+                return 2
 
     def setting_text_handler_func(self, update, context):
         pass
 
     def send_img(self, address, context, update, text):
-        context.bot.send_photo(
-            update.message.chat_id,
-            address,
-            caption=text
-        )
+        try:
+            context.bot.send_photo(
+                update.message.chat_id,
+                address,
+                caption=text
+            )
+        except Exception:
+            update.message.reply_text('Возникла ошибка!',
+                                      reply_markup=self.create_keyboard(BACK_MARKUP))
 
 
 if __name__ == '__main__':
