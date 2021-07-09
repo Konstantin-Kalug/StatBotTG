@@ -34,16 +34,17 @@ class Plot:
         try:
             elems = self.get_elements()
             if type(self.color) == list:
-                self.color = [choice([self.color]) for _ in range(len(self.color))]
-            plt.figure(figsize=(2 * len(elems.keys()), 2 * len(elems.keys())))
+                self.color = [choice(self.color) for _ in range(len(self.color))]
+            plt.figure(figsize=(5 * len(elems.keys()), 5 * len(elems.keys())))
             plt.title(self.title)
             plt.xlabel(self.xlabel)
             plt.ylabel(self.ylabel)
-            plt.legend(self.legend)
             if self.type == 'Столбчатая':
                 plt.bar(list(elems.keys()), list(elems.values()), color=self.color)
             else:
                 plt.pie(list(elems.keys()), list(elems.values()))
+            if self.legend:
+                plt.legend()
             plt.savefig(address)
         except Exception:
             return -1

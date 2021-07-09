@@ -15,7 +15,7 @@ FIGURE_ADDRESS = 'static/img/figure.png'
 class Bot:
     def __init__(self):
         # инициализация бота
-        TOKEN = '1695668954:AAGIP9C_rmojFPzHeER7_-UQNGiOnLtA8qI'
+        TOKEN = ''
         updater = Updater(TOKEN, use_context=True)
         # работа с телеграммом
         dp = updater.dispatcher
@@ -114,7 +114,7 @@ class Bot:
         try:
             context.bot.send_photo(
                 update.message.chat_id,
-                address,
+                open(address, 'rb'),
                 caption=text
             )
         except Exception:
