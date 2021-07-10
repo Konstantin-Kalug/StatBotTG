@@ -42,7 +42,7 @@ class Plot:
             if self.type == 'Столбчатая':
                 plt.bar(list(elems.keys()), list(elems.values()), color=self.color)
             else:
-                plt.pie(list(elems.keys()), list(elems.values()))
+                plt.pie(list(elems.values()), labels=list(elems.keys()))
             if self.legend:
                 plt.legend()
             plt.savefig(address)

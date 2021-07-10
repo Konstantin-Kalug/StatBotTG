@@ -5,7 +5,8 @@ from plot import Plot
 
 START_MARKUP = [['Создать диаграмму', 'Настроить диаграмму'], ['/help', '/stop']]
 BACK_MARKUP = [['Вернуться назад'], ['/stop']]
-COLORS_MARKUP = [['Любые'], ['Вернуться назад'], ['/stop']]
+COLORS_MARKUP = [['Любые'], ['Синий'], ['Зеленый'], ['Красный'], ['Голубой'], ['Фиолетовый'],
+                 ['Желтый'], ['Черный'], ['Белый'], ['Вернуться назад'], ['/stop']]
 HELP_ADDRESS = 'static/txt/help.txt'
 FIGURE_ADDRESS = 'static/img/figure.png'
 
@@ -135,9 +136,38 @@ class Bot:
             update.message.reply_text('Введите название оси!',
                                       reply_markup=self.create_keyboard(BACK_MARKUP))
             return 5
+        elif update.message.text == 'YLabel: ' + context.user_data['ylabel'] or\
+                update.message.text == 'YLabel:':
+            update.message.reply_text('Введите название оси!',
+                                      reply_markup=self.create_keyboard(BACK_MARKUP))
+            return 6
+        elif update.message.text == 'Color: ' + context.user_data['color']:
+            update.message.reply_text('Выберите цвет!',
+                                      reply_markup=self.create_keyboard(COLORS_MARKUP))
+            return 7
+        elif update.message.text == 'Type: ' + context.user_data['type']:
+            context.user_data['type'] = 'Круговая' if\
+                context.user_data['type'] == 'Столбчатая' else 'Столбчатая'
+            update.message.reply_text('Тип изменен!',
+                                      reply_markup=self.create_keyboard(
+                                          self.get_markup_settings(update, context)))
+            return 3
+        elif update.message.text == 'Legend: ' + str(context.user_data['legend']):
+            context.user_data['legend'] = not(context.user_data['legend'])
+            update.message.reply_text('Наличие легенды изменено!',
+                                      reply_markup=self.create_keyboard(
+                                          self.get_markup_settings(update, context)))
+            return 3
+        else:
+            update.message.reply_text('Используйте кнопки!',
+                                      reply_markup=self.create_keyboard(BACK_MARKUP))
+            return 2
 
     def set_title(self, update, context):
         if update.message.text == 'Вернуться назад':
+            update.message.reply_text('Возвращайтесь!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
             return 3
         else:
             context.user_data['title'] = update.message.text
@@ -148,6 +178,9 @@ class Bot:
 
     def set_xlabel(self, update, context):
         if update.message.text == 'Вернуться назад':
+            update.message.reply_text('Возвращайтесь!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
             return 3
         else:
             context.user_data['xlabel'] = update.message.text
@@ -158,6 +191,9 @@ class Bot:
 
     def set_ylabel(self, update, context):
         if update.message.text == 'Вернуться назад':
+            update.message.reply_text('Возвращайтесь!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
             return 3
         else:
             context.user_data['ylabel'] = update.message.text
@@ -168,13 +204,20 @@ class Bot:
 
     def set_color(self, update, context):
         if update.message.text == 'Вернуться назад':
+            update.message.reply_text('Возвращайтесь!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
             return 3
-        else:
-            context.user_data['xlabel'] = update.message.text
+        if [update.message.text] in COLORS_MARKUP:
+            context.user_data['color'] = update.message.text
             update.message.reply_text('Продолжайте!',
                                       reply_markup=self.create_keyboard(self.get_markup_settings(
                                           update, context)))
             return 3
+        else:
+            update.message.reply_text('Используйте кнопки!',
+                                      reply_markup=self.create_keyboard(COLORS_MARKUP))
+            return 7
 
     def send_img(self, address, context, update, text):
         try:
