@@ -6,8 +6,6 @@ from plot import Plot
 START_MARKUP = [['Создать диаграмму', 'Настроить диаграмму'], ['/help', '/stop']]
 BACK_MARKUP = [['Вернуться назад'], ['/stop']]
 COLORS_MARKUP = [['Любые'], ['Вернуться назад'], ['/stop']]
-SETTINGS_MARKUP = [['Title: '], ['XLabel: '], ['YLabel: '], ['Color: '],
-                   ['Type: '], ['Legend: '], ['Вернуться назад'], ['/stop']]
 HELP_ADDRESS = 'static/txt/help.txt'
 FIGURE_ADDRESS = 'static/img/figure.png'
 
@@ -30,13 +28,32 @@ class Bot:
                                    pass_user_data=True)],
                 3: [CommandHandler('stop', self.stop),
                     MessageHandler(Filters.text, self.setting_text_handler_func,
-                                   pass_user_data=True)]
+                                   pass_user_data=True)],
+                4: [CommandHandler('stop', self.stop), MessageHandler(Filters.text, self.set_title,
+                                                                      pass_user_data=True)],
+                5: [CommandHandler('stop', self.stop), MessageHandler(Filters.text, self.set_xlabel,
+                                                                      pass_user_data=True)],
+                6: [CommandHandler('stop', self.stop), MessageHandler(Filters.text, self.set_ylabel,
+                                                                      pass_user_data=True)],
+                7: [CommandHandler('stop', self.stop), MessageHandler(Filters.text, self.set_color,
+                                                                      pass_user_data=True)]
             },
             fallbacks=[CommandHandler('stop', self.stop)]
         )
         dp.add_handler(conv_handler)
         updater.start_polling()
         updater.idle()
+
+    def get_markup_settings(self, update, context):
+        markup = [['Title: '], ['XLabel: '], ['YLabel: '], ['Color: '],
+                   ['Type: '], ['Legend: '], ['Вернуться назад'], ['/stop']]
+        markup[0][0] += context.user_data['title']
+        markup[1][0] += context.user_data['xlabel']
+        markup[2][0] += context.user_data['ylabel']
+        markup[3][0] += context.user_data['color']
+        markup[4][0] += context.user_data['type']
+        markup[5][0] += str(context.user_data['legend'])
+        return markup
 
     def create_keyboard(self, markup):
         return ReplyKeyboardMarkup(markup, one_time_keyboard=False)
@@ -78,15 +95,9 @@ class Bot:
                                       reply_markup=self.create_keyboard(BACK_MARKUP))
             return 2
         elif update.message.text == 'Настроить диаграмму':
-            markup = SETTINGS_MARKUP
-            markup[0][0] += context.user_data['title']
-            markup[1][0] += context.user_data['xlabel']
-            markup[2][0] += context.user_data['ylabel']
-            markup[3][0] += context.user_data['color']
-            markup[4][0] += context.user_data['type']
-            markup[5][0] += context.user_data['legend']
             update.message.reply_text('Настройте будущую диаграмму!',
-                                      reply_markup=self.create_keyboard(markup))
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
             return 3
         else:
             update.message.reply_text('Используйте кнопки, пожалуйста!',
@@ -94,6 +105,8 @@ class Bot:
 
     def create_text_handler_func(self, update, context):
         if update.message.text == 'Вернуться назад':
+            update.message.reply_text('Возвращайтесь!',
+                                      reply_markup=self.create_keyboard(START_MARKUP))
             return 1
         else:
             plot = Plot(context.user_data['title'], context.user_data['xlabel'],
@@ -108,7 +121,60 @@ class Bot:
                 return 2
 
     def setting_text_handler_func(self, update, context):
-        pass
+        if update.message.text == 'Вернуться назад':
+            update.message.reply_text('Возвращайтесь!',
+                                      reply_markup=self.create_keyboard(START_MARKUP))
+            return 1
+        elif update.message.text == 'Title: ' + context.user_data['title'] or\
+                update.message.text == 'Title:':
+            update.message.reply_text('Введите название!',
+                                      reply_markup=self.create_keyboard(BACK_MARKUP))
+            return 4
+        elif update.message.text == 'XLabel: ' + context.user_data['xlabel'] or\
+                update.message.text == 'XLabel:':
+            update.message.reply_text('Введите название оси!',
+                                      reply_markup=self.create_keyboard(BACK_MARKUP))
+            return 5
+
+    def set_title(self, update, context):
+        if update.message.text == 'Вернуться назад':
+            return 3
+        else:
+            context.user_data['title'] = update.message.text
+            update.message.reply_text('Продолжайте!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
+            return 3
+
+    def set_xlabel(self, update, context):
+        if update.message.text == 'Вернуться назад':
+            return 3
+        else:
+            context.user_data['xlabel'] = update.message.text
+            update.message.reply_text('Продолжайте!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
+            return 3
+
+    def set_ylabel(self, update, context):
+        if update.message.text == 'Вернуться назад':
+            return 3
+        else:
+            context.user_data['ylabel'] = update.message.text
+            update.message.reply_text('Продолжайте!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
+            return 3
+
+    def set_color(self, update, context):
+        if update.message.text == 'Вернуться назад':
+            return 3
+        else:
+            context.user_data['xlabel'] = update.message.text
+            update.message.reply_text('Продолжайте!',
+                                      reply_markup=self.create_keyboard(self.get_markup_settings(
+                                          update, context)))
+            return 3
 
     def send_img(self, address, context, update, text):
         try:
